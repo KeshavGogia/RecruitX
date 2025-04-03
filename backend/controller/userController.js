@@ -58,7 +58,7 @@ export const addNewRecruiter = catchAsyncErrors(async (req,res,next) => {
         return next(new ErrorHandler(`${isRegistered.role} with same email already exists`,400));
     }
 
-    const admin = User.create({firstName, lastName, phone, email, nic, dob, password, gender, role : "Admin"});
+    const admin = User.create({firstName, lastName, phone, email, dob, password, gender, role : "Recruiter"});
     res.status(200).json({
         success : true,
         message : "New Recruiter registered"

@@ -4,7 +4,7 @@ import cors from 'cors';
 import cookieParser from "cookie-parser";
 import { dbConnection } from "./database/dbConnect.js";
 import userRouter from './router/userRouter.js';
-import applyRouter from "./router/applyRouter.js";
+import jobRouter from "./router/jobRouter.js";
 import {errorMiddleware} from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -24,9 +24,7 @@ app.use(express.urlencoded({extended : true}));
 
 
 app.use('/user', userRouter);
-// app.use('/api/v1/message', messageRouter);
-// app.use('/apply', applyRouter);
-
+app.use('/job', jobRouter);
 
 dbConnection();
 

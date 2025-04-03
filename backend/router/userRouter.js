@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post("/login",login);
 router.post("/candidate/register",candidateRegister);
-router.post("/recruiter/addnew", isRecruiterAuthenticated, addNewRecruiter);
+router.post("/recruiter/addnew", addNewRecruiter);
 router.get("/recruiter/logout",isRecruiterAuthenticated,logoutRecruiter);
 router.get("/candidate/logout",isCandidateAuthenticated,logoutCandidate);
 
