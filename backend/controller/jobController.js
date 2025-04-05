@@ -3,6 +3,25 @@ import { Job } from "../models/jobSchema.js";
 import { Application } from "../models/applicationSchema.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+dotenv.config({ path: "config/config.env" });
+
+
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET,
+});
+
+console.log({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET,
+  });
+  
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,12 +69,33 @@ export const applyForJob = async (req, res) => {
             return res.status(404).json({ error: "Job not found" });
         }
 
-        const existingApplication = await Application.findOne({ job: job._id, candidate: candidateId });
+        const existingApplication = await Application.findOne({
+            job: job._id,
+            candidate: candidateId,
+        });
         if (existingApplication) {
             return res.status(400).json({ error: "You have already applied for this job" });
         }
 
-        const resumeURL = `/uploads/${req.file.filename}`;
+        // Wrap upload_stream in a Promise
+        const uploadToCloudinary = () => {
+            return new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: "resumes",
+                        resource_type: "raw",
+                        public_id: `${Date.now()}-${req.file.originalname.split('.')[0]}`
+                    },
+                    (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result);
+                    }
+                );
+                stream.end(req.file.buffer);
+            });
+        };
+
+        const uploadResult = await uploadToCloudinary();
 
         const { firstName, lastName, email, phone } = req.user;
 
@@ -66,7 +106,7 @@ export const applyForJob = async (req, res) => {
             lastName,
             email,
             phone,
-            resumeURL,
+            resumeURL: uploadResult.secure_url,
             jobNumber: job.jobNumber,
         });
 
@@ -74,6 +114,7 @@ export const applyForJob = async (req, res) => {
 
         res.status(201).json({ message: "Application submitted successfully", application });
     } catch (error) {
+        console.error("Error in applyForJob:", error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -100,11 +141,18 @@ export const getApplicants = async (req, res) => {
 export const deleteJob = async (req, res) => {
     try {
         const { jobNumber } = req.params;
-        const job = await Job.findOneAndDelete(jobNumber);
-        if (!job) return res.status(404).json({ error: "Job not found" });
-        await Application.deleteMany({ jobNumber: jobNumber });
-        res.status(200).json({ message: "Job deleted successfully" });
+
+        const job = await Job.findOneAndDelete({ jobNumber });
+
+        if (!job) {
+            return res.status(404).json({ error: "Job with given job number not found" });
+        }
+
+        await Application.deleteMany({ job: job._id });
+
+        res.status(200).json({ message: "Job and related applications deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
