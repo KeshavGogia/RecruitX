@@ -5,8 +5,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 dotenv.config({ path: "config/config.env" });
-
-
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -15,18 +13,10 @@ cloudinary.config({
     api_secret: process.env.CLOUD_API_SECRET,
 });
 
-console.log({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.CLOUD_API_KEY,
-    api_secret: process.env.CLOUD_API_SECRET,
-  });
-  
-
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
- const generateJobNumber = async () => {
+const generateJobNumber = async () => {
     const count = await Job.countDocuments();
     return `RecruitX${count + 1}`;
 };
@@ -122,6 +112,11 @@ export const applyForJob = async (req, res) => {
 export const getAllJobs = async (req, res) => {
     try {
         const jobs = await Job.find().populate("recruiter", "name email");
+
+        if (jobs.length === 0) {
+            return res.status(200).json({ message: "No job listings available currently." });
+        }
+
         res.status(200).json(jobs);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -131,12 +126,18 @@ export const getAllJobs = async (req, res) => {
 export const getApplicants = async (req, res) => {
     try {
         const { jobNumber } = req.params;
-        const applications = await Application.find({ jobNumber: jobNumber }).populate("candidate", "name email");
+        const applications = await Application.find({ jobNumber }).populate("candidate", "name email");
+
+        if (applications.length === 0) {
+            return res.status(200).json({ message: "No applicants have applied for this job yet." });
+        }
+
         res.status(200).json(applications);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 export const deleteJob = async (req, res) => {
     try {
