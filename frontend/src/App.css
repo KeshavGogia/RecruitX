@@ -1,0 +1,78 @@
+.home {
+  padding: 2rem;
+  text-align: center;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 2rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.about {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 2rem;
+}
+
+.about-section {
+  width: 45%;
+}
+
+.about-section img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.login-container,
+.landing {
+  padding: 2rem;
+  max-width: 600px;
+  margin: auto;
+}
+
+form input {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+}
+
+form button,
+.upload-section button {
+  width: 100%;
+}
+
+.toggle {
+  color: blue;
+  cursor: pointer;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.landing ul {
+  list-style: none;
+  padding: 0;
+}
+
+.landing li {
+  background-color: white;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.upload-section {
+  margin-top: 2rem;
+}
