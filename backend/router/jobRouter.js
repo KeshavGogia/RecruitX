@@ -9,8 +9,8 @@ const router = express.Router();
 
 router.post("/create", isRecruiterAuthenticated, createJob);
 router.get("/listings", getAllJobs);
-router.post("/apply/:jobId", isCandidateAuthenticated, upload.single("resume"), applyForJob);
-router.get("/applicants/:jobId", isRecruiterAuthenticated, getApplicants);
-router.delete("/delete/:jobId", isRecruiterAuthenticated, deleteJob);
+router.post("/apply/:jobNumber", isCandidateAuthenticated, upload.single("resume"), applyForJob);
+router.get("/applicants/:jobNumber", isRecruiterAuthenticated, getApplicants);
+router.delete("/delete/:jobNumber", isRecruiterAuthenticated, deleteJob);
 
 export default router;
