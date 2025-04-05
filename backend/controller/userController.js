@@ -4,8 +4,8 @@ import {User} from "../models/userSchema.js";
 import {genrateToken} from "../utils/jwtToken.js";
 
 export const candidateRegister = catchAsyncErrors(async(req,res,next) => {
-    const { firstName, lastName, phone, email, role, dob, password, gender} = req.body;
-
+    const { firstName, lastName, phone, email, dob, password, gender} = req.body;
+    const role = "Candidate"
     if(!firstName || !lastName || !phone || !email || !role || !dob || !password || !gender){
         return next(new ErrorHandler("Please fill all details in the form",400));
     }
