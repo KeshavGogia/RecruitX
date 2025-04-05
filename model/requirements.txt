@@ -1,0 +1,6 @@
+groq
+requests
+openai
+python-dotenv
+PyPDF2
+PyMuPDF
