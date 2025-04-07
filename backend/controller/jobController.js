@@ -111,19 +111,17 @@ export const applyForJob = async (req, res) => {
 
 export const getAllJobs = async (req, res) => {
     try {
-      const recruiterId = req.user._id;
-  
-      const jobs = await Job.find({ recruiter: recruiterId }).populate("recruiter", "name email");
-  
-      if (jobs.length === 0) {
-        return res.status(200).json({ message: "No job listings available for this recruiter." });
-      }
-  
-      res.status(200).json(jobs);
+        const jobs = await Job.find().populate("recruiter", "name email");
+
+        if (jobs.length === 0) {
+            return res.status(200).json({ message: "No job listings available currently." });
+        }
+
+        res.status(200).json(jobs);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
-  };  
+};
 
 export const getApplicants = async (req, res) => {
     try {
