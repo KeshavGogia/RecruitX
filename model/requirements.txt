@@ -4,3 +4,5 @@ openai
 python-dotenv
 PyPDF2
 PyMuPDF
+flask
+flask-cors
