@@ -20,7 +20,7 @@ cloudinary.config(
 
 
 app = Flask(__name__) 
-CORS(app, origins=["http://localhost:5173","http://localhost:5173"], supports_credentials=True)
+CORS(app, origins=["http://localhost:5173","http://localhost:5174"], supports_credentials=True)
 
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
