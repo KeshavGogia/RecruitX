@@ -7,15 +7,24 @@ import time
 from dotenv import load_dotenv
 from groq import Groq
 from flask_cors import CORS
+import cloudinary
+import cloudinary.uploader
 
-app = Flask(__name__)
-CORS(app)
 load_dotenv()
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+)
+
+
+app = Flask(__name__) 
+CORS(app, origins=["http://localhost:5173","http://localhost:5173"], supports_credentials=True)
+
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
-
-app = Flask(__name__)
 
 def extract_text_from_pdf(url, retries=3, delay=2):
     for attempt in range(retries):
@@ -89,23 +98,45 @@ JSON format:
 @app.route('/evaluate', methods=['POST'])
 def evaluate():
     try:
-        data = request.json
-        job_desc = data.get("job_description")
-        requirements = data.get("requirements")
-        resume_url = data.get("resume_url")
+        # Step 1: Extract job_number and resume file
+        job_number = request.form.get("job_number")
+        resume_file = request.files.get("resume")
 
-        if not all([job_desc, requirements, resume_url]):
-            return jsonify({"error": "Missing fields"}), 400
+        if not job_number or not resume_file:
+            return jsonify({"error": "Missing job_number or resume"}), 400
 
+        # Step 2: Upload resume to Cloudinary
+        upload_result = cloudinary.uploader.upload(resume_file, resource_type="raw",type="upload")
+        resume_url = upload_result.get("secure_url")
+
+        if not resume_url:
+            return jsonify({"error": "Failed to upload resume to Cloudinary"}), 500
+
+        # Step 3: Fetch job description and requirements
+        job_details_url = f"http://localhost:8000/job/details/{job_number}"
+        job_response = requests.get(job_details_url, headers={"x-internal-call": "true"})
+
+        if job_response.status_code != 200:
+            return jsonify({"error": "Failed to fetch job details"}), 500
+
+        job_data = job_response.json()
+        job_desc = job_data.get("description")
+        requirements = job_data.get("requirements")
+
+        if not job_desc or not requirements:
+            return jsonify({"error": "Incomplete job information"}), 500
+
+        # Step 4: Analyze resume
         resume_text = extract_text_from_pdf(resume_url)
         result = analyze_resume(job_desc, requirements, resume_text)
+
         return jsonify(result)
 
     except Exception as e:
         return jsonify({"error": "Something went wrong", "details": str(e)}), 500
 
 @app.route('/recruiter/evaluate', methods=['POST'])
-def recruiter_evaluate_all():
+def recruiter_evaluate():
     try:
         data = request.json
         job_number = data.get("job_number")
