@@ -111,17 +111,19 @@ export const applyForJob = async (req, res) => {
 
 export const getAllJobs = async (req, res) => {
     try {
-        const jobs = await Job.find().populate("recruiter", "name email");
-
-        if (jobs.length === 0) {
-            return res.status(200).json({ message: "No job listings available currently." });
-        }
-
-        res.status(200).json(jobs);
+      const recruiterId = req.user._id;
+  
+      const jobs = await Job.find({ recruiter: recruiterId }).populate("recruiter", "name email");
+  
+      if (jobs.length === 0) {
+        return res.status(200).json({ message: "No job listings available for this recruiter." });
+      }
+  
+      res.status(200).json(jobs);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message });
     }
-};
+  };  
 
 export const getApplicants = async (req, res) => {
     try {
@@ -157,3 +159,25 @@ export const deleteJob = async (req, res) => {
     }
 };
 
+export const getJob = async (req, res, next) => {
+    try {
+      const { jobNumber } = req.params;
+  
+      const job = await Job.findOne({ jobNumber }).populate("recruiter", "name email"); // Optional: populate recruiter details
+  
+      if (!job) {
+        return res.status(404).json({ error: "Job not found" });
+      }
+  
+      return res.status(200).json({
+        title: job.title,
+        description: job.description,
+        requirements: job.requirements,
+        salary: job.salary,
+        location: job.location,
+        recruiter: job.recruiter, 
+      });
+    } catch (error) {
+      return res.status(500).json({ error: "Failed to fetch job details", details: error.message });
+    }
+  };
