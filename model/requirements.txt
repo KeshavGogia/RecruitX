@@ -6,3 +6,4 @@ PyPDF2
 PyMuPDF
 flask
 flask-cors
+cloudinary
