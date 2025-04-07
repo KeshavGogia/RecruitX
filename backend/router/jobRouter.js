@@ -6,7 +6,7 @@ import { isRecruiterAuthenticated, isCandidateAuthenticated } from "../middlewar
 const router = express.Router();
 
 router.post("/create", isRecruiterAuthenticated, createJob);
-router.get("/listings",isRecruiterAuthenticated, getAllJobs);
+router.get("/listings", getAllJobs);
 router.post("/apply/:jobNumber", isCandidateAuthenticated,upload.single("resume"),applyForJob);
 router.get("/applicants/:jobNumber", isRecruiterAuthenticated, getApplicants);
 router.delete("/delete/:jobNumber", isRecruiterAuthenticated, deleteJob);
